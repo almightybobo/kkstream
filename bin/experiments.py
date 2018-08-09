@@ -29,14 +29,31 @@ import csv
 import numpy as np
 import os
 
+'''
+model package
+'''
+from xgboost.sklearn import XGBClassifier
+from sklearn import *
+import pickle
 
-def predict(features):
-    ""
-    ""
-    # NOTE: guess with random probabilities. the AUC should be closed to 0.5.
-    n, v = features.shape
+def XGB(trX, valX, trY, valY):
+    ### XGBoost (28 classifier, version 1)
+    clf = XGBClassifier()
+    for i in range(0, 28):
+        eval_set = [(trX, trY[:, i]), (valX, valY[:, i])]
+        clf.fit(trX, trY[:, i], early_stopping_rounds=10, eval_set=eval_set, eval_metric='auc', verbose=True)
+        pickle.dump(clf, open('xgb'+ str(i) + '.pickle', 'wb'))
+    # return model
 
-    return np.random.random((n, 28))
+
+def predict(features): # feature type: numpy (37092, 896)
+    answer = []
+    for i in range(0, 28):
+        loaded_model = pickle.load(open('./model/xgb'+ str(i) + '.pickle', 'rb')) 
+        y_pred = loaded_model.predict(features)
+        answer.append(y_pred)
+    print(np.array(answer).T.shape)
+    return np.array(answer).T
 
 
 def write_result(name, predictions):
@@ -108,6 +125,8 @@ print('valid_eigens.shape = {}'.format(valid_eigens.shape))
 print('valid_labels.shape = {}'.format(valid_labels.shape))
 
 # NOTE: predict and save
+
+model = XGB(train_eigens, valid_eigens, train_labels, valid_labels)
 test_guesss = predict(test_eigens)
 
-write_result('dnn.csv', test_guesss)
+write_result('../results/xgb_v1.csv', test_guesss)
