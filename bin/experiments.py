@@ -41,7 +41,7 @@ def XGB(trX, valX, trY, valY):
     clf = XGBClassifier()
     for i in range(0, 28):
         eval_set = [(trX, trY[:, i]), (valX, valY[:, i])]
-        clf.fit(trX, trY[:, i], early_stopping_rounds=20, eval_set=eval_set, eval_metric='auc', verbose=True)
+        clf.fit(trX, trY[:, i], early_stopping_rounds=50, eval_set=eval_set, eval_metric='auc', verbose=True)
         # save model
         pickle.dump(clf, open('./model/xgb'+ str(i) + '.pickle', 'wb'))
 
@@ -55,6 +55,12 @@ def predict(features): # feature type: numpy (37092, 896)
     print(np.array(answer).T.shape)
     return np.array(answer).T
 
+def xgb_multioutput(features, trX, trY):
+    clf = XGBClassifier()
+    multi_target_xgb = multioutput.MultiOutputClassifier(clf, n_jobs=-1)
+    return multi_target_xgb.fit(trX, trY).predict(features)
+    
+    
 
 def write_result(name, predictions):
     """
@@ -126,7 +132,9 @@ print('valid_labels.shape = {}'.format(valid_labels.shape))
 
 # NOTE: predict and save
 
-model = XGB(train_eigens, valid_eigens, train_labels, valid_labels)
-test_guesss = predict(test_eigens)
+# XGB(train_eigens, valid_eigens, train_labels, valid_labels)
+# test_guesss = predict(test_eigens)
 
-write_result('../results/xgb_v2.csv', test_guesss)
+test_guess = xgb_multioutput(test_eigens, train_eigens, train_labels) 
+
+write_result('../results/xgb_multi.csv', test_guess)
