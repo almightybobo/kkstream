@@ -135,6 +135,6 @@ print('valid_labels.shape = {}'.format(valid_labels.shape))
 # XGB(train_eigens, valid_eigens, train_labels, valid_labels)
 # test_guesss = predict(test_eigens)
 
-test_guess = xgb_multioutput(test_eigens, train_eigens, train_labels) 
+test_guess = xgb_multioutput(test_eigens, np.concatenate((train_eigens, valid_eigens), axis=0), np.concatenate((train_labels, valid_labels), axis=0)) 
 
-write_result('../results/xgb_multi.csv', test_guess)
+write_result('../results/xgb_multi_val.csv', test_guess)
