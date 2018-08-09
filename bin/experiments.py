@@ -41,9 +41,9 @@ def XGB(trX, valX, trY, valY):
     clf = XGBClassifier()
     for i in range(0, 28):
         eval_set = [(trX, trY[:, i]), (valX, valY[:, i])]
-        clf.fit(trX, trY[:, i], early_stopping_rounds=10, eval_set=eval_set, eval_metric='auc', verbose=True)
-        pickle.dump(clf, open('xgb'+ str(i) + '.pickle', 'wb'))
-    # return model
+        clf.fit(trX, trY[:, i], early_stopping_rounds=20, eval_set=eval_set, eval_metric='auc', verbose=True)
+        # save model
+        pickle.dump(clf, open('./model/xgb'+ str(i) + '.pickle', 'wb'))
 
 
 def predict(features): # feature type: numpy (37092, 896)
@@ -129,4 +129,4 @@ print('valid_labels.shape = {}'.format(valid_labels.shape))
 model = XGB(train_eigens, valid_eigens, train_labels, valid_labels)
 test_guesss = predict(test_eigens)
 
-write_result('../results/xgb_v1.csv', test_guesss)
+write_result('../results/xgb_v2.csv', test_guesss)
